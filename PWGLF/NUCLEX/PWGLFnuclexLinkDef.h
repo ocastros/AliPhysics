@@ -133,6 +133,7 @@
 #pragma link C++ class SHyperTriton<RHyperTriton3KF>+;
 #pragma link C++ class SHyperTriton<RHyperTriton3O2>+;
 #pragma link C++ class AliAnalysisTaskHypertriton3+;
+#pragma link C++ class AliAnalysisTaskLambdaB+;
 #pragma link C++ class o2::track::TrackAuxPar+;
 #pragma link C++ class o2::track::CrossInfo+;
 #pragma link C++ class o2::utils::CircleXY+;
