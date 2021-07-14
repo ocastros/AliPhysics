@@ -212,14 +212,14 @@ void AliAnalysisTaskLambdaB::UserCreateOutputObjects()
 //!!
   if (fMC && man->GetMCtruthEventHandler())
   {
-    fGenHypO2 = new SHyperTriton3O2;
-    fRecHyp = (RHyperTriton3O2 *)fGenHypO2;
-    fTreeHyp3->Branch("SHyperTriton", fGenHypO2);
+    fGenHypO2 = new SLambdaB3O2;
+    fRecHyp = (RLambdaB3O2 *)fGenHypO2;
+    fTreeHyp3->Branch("SLambdaB", fGenHypO2);
   }
   else
   {
-    fRecHyp = new RHyperTriton3O2;
-    fTreeHyp3->Branch("RHyperTriton", static_cast<RHyperTriton3O2 *>(fRecHyp));
+    fRecHyp = new RLambdaB3O2;
+    fTreeHyp3->Branch("RLambdaB", static_cast<RLambdaB3O2 *>(fRecHyp));
   }
   fCosPAsplineFile = TFile::Open(AliDataFile::GetFileName(fCosPAsplineName).data());
   if (fCosPAsplineFile)
@@ -440,7 +440,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
   int indices[2][3]{{1, 1, 0}, {0, 0, 1}};
 
   //!!
-  RHyperTriton3O2 &o2RecHyp = *(RHyperTriton3O2 *)fRecHyp;
+  RLambdaB3O2 &o2RecHyp = *(RLambdaB3O2 *)fRecHyp;
 
   for (int idx{0}; idx < 2; ++idx)
   {
@@ -546,7 +546,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
               record = record || momId >= 0;
               if (record)
               {
-                FillGenHypertriton(fGenHypO2, momId, true, mcEvent);
+                FillGenLambdaB(fGenHypO2, momId, true, mcEvent);
                 mcMap[momId] = 1;
               }
             }
@@ -564,7 +564,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
 
   if (fMC)
   {
-    RHyperTriton3O2 rec;
+    RLambdaB3O2 rec;
     rec.centrality = fRecHyp->centrality;
     rec.trigger = fRecHyp->trigger;
     *fRecHyp = rec;
@@ -583,7 +583,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
         continue;
       if (mcMap.find(iTrack) != mcMap.end())
         continue;
-      FillGenHypertriton(fGenHypO2, iTrack, false, mcEvent);
+      FillGenLambdaB(fGenHypO2, iTrack, false, mcEvent);
       fTreeHyp3->Fill();
     }
   }
@@ -689,8 +689,8 @@ AliAnalysisTaskLambdaB *AliAnalysisTaskLambdaB::AddTask(bool isMC, TString suffi
       Form("%s_summary", tskname.Data()), TList::Class(), AliAnalysisManager::kOutputContainer, "AnalysisResults.root");
 
   AliAnalysisDataContainer *coutput2 =
-      mgr->CreateContainer(Form("HyperTritonTree%s", suffix.Data()), TTree::Class(),
-                           AliAnalysisManager::kOutputContainer, Form("HyperTritonTree3.root:%s", suffix.Data()));
+      mgr->CreateContainer(Form("LambdaBTree%s", suffix.Data()), TTree::Class(),
+                           AliAnalysisManager::kOutputContainer, Form("LambdaBTree3.root:%s", suffix.Data()));
   coutput2->SetSpecialOutput();
 
   mgr->ConnectInput(task, 0, mgr->GetCommonInputContainer());

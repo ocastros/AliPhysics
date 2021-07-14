@@ -62,7 +62,10 @@ struct RHyperTriton3O2 : public RHyperTriton {
   ClassDef(RHyperTriton3O2,3)
 };
 
-struct RHyperTriton3KF : public RHyperTriton {
+struct 
+
+
+RHyperTriton3KF : public RHyperTriton {
   RHyperTriton3KF() : RHyperTriton{} {}
   virtual ~RHyperTriton3KF() = default;
   float chi2_deuprot = -1.f;

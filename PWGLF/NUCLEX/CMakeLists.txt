@@ -131,6 +131,7 @@ if(ROOT_VERSION_MAJOR EQUAL 6)
       Hypernuclei/Hyp3Body/AliAnalysisTaskHypertriton3.cxx
       Hypernuclei/Hyp3Body/Hypertriton3structures.cxx
       Exotica/LambdaB/AliAnalysisTaskLambdaB.cxx
+      Exotica/LambdaB/LambdaBstructures.cxx
       Utils/O2vertexer/Primitive2D.cxx
       Utils/O2vertexer/DCAFitterN.cxx
 	  )
