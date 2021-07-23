@@ -10,6 +10,7 @@
 #include "AliPID.h"
 #include "AliPIDResponse.h"
 #include "AliVVertex.h"
+#include "Hypertriton3structures.h"
 
 #include <Riostream.h>
 #include <TChain.h>
@@ -60,7 +61,7 @@ namespace
   constexpr float kAP2Mass{0.938272};
   constexpr float kAP1Mass{0.938272};
   constexpr float kMasses[3]{kHeMass, kAP1Mass, kAP2Mass};
-  constexpr AliPID::EParticleType kAliPID[3]{AliPID::kHe3, AliPID::kAProton, AliPID::kAProton};
+  constexpr AliPID::EParticleType kAliPID[3]{AliPID::kHe3, AliPID::kProton, AliPID::kProton};
   const int kPDGs[3]{AliPID::ParticleCode(kAliPID[0]), AliPID::ParticleCode(kAliPID[1]), AliPID::ParticleCode(kAliPID[2])};
 
   bool IsLambdaB(const AliVParticle *vPart, AliMCEvent *mcEvent)
@@ -132,7 +133,7 @@ namespace
 
 } // namespace
 
-AliAnalysisTaskLambdaB::~AliAnalysisTaskLambdaB(bool mc, std::string name)
+AliAnalysisTaskLambdaB::AliAnalysisTaskLambdaB(bool mc, std::string name)
     : AliAnalysisTaskSE(name.data()), fEventCuts{}, fVertexer{}, fVertexerLambda{}, fMC{mc}
 {
   fTrackCuts.SetMinNClustersTPC(0);
@@ -402,35 +403,35 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
 
     float dca[2], bCov[3];
     tracks[0]->GetImpactParameters(dca, bCov);
-    fRecHyp->dca_de = std::hypot(dca[0], dca[1]);
+    fRecHyp->dca_He = std::hypot(dca[0], dca[1]);
     tracks[1]->GetImpactParameters(dca, bCov);
-    fRecHyp->dca_pr = std::hypot(dca[0], dca[1]);
+    fRecHyp->dca_Apr1 = std::hypot(dca[0], dca[1]);
     tracks[2]->GetImpactParameters(dca, bCov);
-    fRecHyp->dca_pi = std::hypot(dca[0], dca[1]);
+    fRecHyp->dca_Apr2 = std::hypot(dca[0], dca[1]);
 
-    fRecHyp->hasTOF_de = HasTOF(tracks[0]);
-    fRecHyp->hasTOF_pr = HasTOF(tracks[1]);
-    fRecHyp->hasTOF_pi = HasTOF(tracks[2]);
+    fRecHyp->hasTOF_He = HasTOF(tracks[0]);
+    fRecHyp->hasTOF_Apr1 = HasTOF(tracks[1]);
+    fRecHyp->hasTOF_Apr2 = HasTOF(tracks[2]);
 
-    fRecHyp->tofNsig_de = nSigmaTOF[0];
-    fRecHyp->tofNsig_pr = nSigmaTOF[1];
-    fRecHyp->tofNsig_pi = nSigmaTOF[2];
+    fRecHyp->tofNsig_He = nSigmaTOF[0];
+    fRecHyp->tofNsig_Apr1 = nSigmaTOF[1];
+    fRecHyp->tofNsig_Apr2 = nSigmaTOF[2];
 
-    fRecHyp->tpcNsig_de = nSigmaTPC[0];
-    fRecHyp->tpcNsig_pr = nSigmaTPC[1];
-    fRecHyp->tpcNsig_pi = nSigmaTPC[2];
+    fRecHyp->tpcNsig_He = nSigmaTPC[0];
+    fRecHyp->tpcNsig_Apr1 = nSigmaTPC[1];
+    fRecHyp->tpcNsig_Apr2 = nSigmaTPC[2];
 
-    fRecHyp->tpcClus_de = tracks[0]->GetTPCsignalN();
-    fRecHyp->tpcClus_pr = tracks[1]->GetTPCsignalN();
-    fRecHyp->tpcClus_pi = tracks[2]->GetTPCsignalN();
+    fRecHyp->tpcClus_He = tracks[0]->GetTPCsignalN();
+    fRecHyp->tpcClus_Apr1 = tracks[1]->GetTPCsignalN();
+    fRecHyp->tpcClus_Apr2 = tracks[2]->GetTPCsignalN();
 
-    fRecHyp->its_clusmap_de = tracks[0]->GetITSClusterMap();
-    fRecHyp->its_clusmap_pr = tracks[1]->GetITSClusterMap();
-    fRecHyp->its_clusmap_pi = tracks[2]->GetITSClusterMap();
+    fRecHyp->its_clusmap_He = tracks[0]->GetITSClusterMap();
+    fRecHyp->its_clusmap_Apr1 = tracks[1]->GetITSClusterMap();
+    fRecHyp->its_clusmap_Apr2 = tracks[2]->GetITSClusterMap();
 
-    fRecHyp->is_ITSrefit_de = tracks[0]->GetStatus() & AliVTrack::kITSrefit;
-    fRecHyp->is_ITSrefit_pr = tracks[1]->GetStatus() & AliVTrack::kITSrefit;
-    fRecHyp->is_ITSrefit_pi = tracks[2]->GetStatus() & AliVTrack::kITSrefit;
+    fRecHyp->is_ITSrefit_He = tracks[0]->GetStatus() & AliVTrack::kITSrefit;
+    fRecHyp->is_ITSrefit_Apr1 = tracks[1]->GetStatus() & AliVTrack::kITSrefit;
+    fRecHyp->is_ITSrefit_Apr2 = tracks[2]->GetStatus() & AliVTrack::kITSrefit;
 
     return true;
   };
@@ -444,7 +445,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
 
   for (int idx{0}; idx < 2; ++idx)
   {
-    for (const auto &he3 : helpers[kDeuteron][indices[idx][0]])
+    for (const auto &he3 : helpers[kHe3][indices[idx][0]])
     {
       int rotations{0};
       auto He3TrackSnapshot = *he3.track;
@@ -457,14 +458,14 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
           double deltaAngle{rotations * TMath::TwoPi() / (fTrackRotations + 1)};
           He3TrackSnapshot.SetParamOnly(he3.track->GetX(), alpha + deltaAngle, he3.track->getParams());
         }
-        for (const auto &Ap1 : helpers[kAProton][indices[idx][1]])
+        for (const auto &Apr1 : helpers[kProton][indices[idx][1]])
         {
-          if (he3.track == Ap1.track)
+          if (he3.track == Apr1.track)
             continue;
 
-          for (const auto &Ap2 : helpers[kAProton][indices[idx][2]])
+          for (const auto &Apr2 : helpers[kProton][indices[idx][2]])
           {
-            if (Ap1.track == Ap2.track || he3.track == Ap2.track || he3.track == Ap1.track)
+            if (Apr1.track == Apr2.track || he3.track == Apr1.track || he3.track == Apr1.track)
               continue;
 
             ROOT::Math::SVector<double, 3U> vert;
@@ -473,7 +474,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
 
             try
             {
-              nVert = fVertexer.process(He3TrackSnapshot, *Ap1.track, *Ap2.track);
+              nVert = fVertexer.process(He3TrackSnapshot, *Apr1.track, *Apr2.track);
             }
             catch (std::runtime_error &e)
             {
@@ -485,14 +486,14 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
             auto &he3Track = fVertexer.getTrack(0);
             auto &Apr1Track = fVertexer.getTrack(1);
             auto &Apr2Track = fVertexer.getTrack(2);
-            lhe3.SetCoordinates((float)he3Track.Pt(), (float)he3Track.Eta(), (float)he3Track.Phi(), kDeuMass);
-            lApro1.SetCoordinates((float)Apr1Track.Pt(), (float)Apr1Track.Eta(), (float)Apr1Track.Phi(), kPMass);
-            lApro2.SetCoordinates((float)Apr2Track.Pt(), (float)Apr2Track.Eta(), (float)Apr2Track.Phi(), kPiMass);
+            lhe3.SetCoordinates((float)he3Track.Pt(), (float)he3Track.Eta(), (float)he3Track.Phi(), kHeMass);
+            lApro1.SetCoordinates((float)Apr1Track.Pt(), (float)Apr1Track.Eta(), (float)Apr1Track.Phi(), kAP1Mass);
+            lApro2.SetCoordinates((float)Apr2Track.Pt(), (float)Apr2Track.Eta(), (float)Apr2Track.Phi(), kAP2Mass);
 
             lambdab = lhe3 + lApro1 + lApro2;
 
-            o2RecHyp.mppi = (lApro1 + lApro2).mass2();
-            o2RecHyp.mdpi = (lhe3 + lApro2).mass2();
+            o2RecHyp.mAp1Ap2 = (lApro1 + lApro2).mass2();
+            o2RecHyp.mHeAp2 = (lhe3 + lApro2).mass2();
             ROOT::Math::Boost boostHyper{lambdab.BoostToCM()};
             auto d{boostHyper(lhe3).Vect()};
             // auto lambda{boostHyper(lApro1 + lApro2).Vect()};
@@ -500,7 +501,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
             auto piV{boostHyper(lApro2).Vect()};
             o2RecHyp.momDstar = std::sqrt(d.Mag2());
             o2RecHyp.cosThetaStar = d.Dot(lambdab.Vect()) / (o2RecHyp.momDstar * lambdab.P());
-            o2RecHyp.cosTheta_ProtonPiH = pV.Dot(piV) / std::sqrt(pV.Mag2() * piV.Mag2());
+            o2RecHyp.cosTheta_AProton1Aproton2 = pV.Dot(piV) / std::sqrt(pV.Mag2() * piV.Mag2());
             vert = fVertexer.getPCACandidate();
             decayVtx.SetCoordinates((float)(vert[0] - pvPos[0]), (float)(vert[1] - pvPos[1]), (float)(vert[2] - pvPos[2]));
             o2RecHyp.candidates = nVert;
@@ -510,19 +511,19 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
             Apr1Track.GetXYZ(Apro1Pos);
             Apr2Track.GetXYZ(Apro2Pos);
 
-            o2RecHyp.dca_He3_Apr1 = Hypot(He3Pos[0] - Apro1Pos[0], He3Pos[1] - Apro1Pos[1], He3Pos[2] - Apro1Pos[2]);
-            if (o2RecHyp.dca_He3_Apr1 > fMaxTrack2TrackDCA[0])
+            o2RecHyp.dca_He_Apr1 = Hypot(He3Pos[0] - Apro1Pos[0], He3Pos[1] - Apro1Pos[1], He3Pos[2] - Apro1Pos[2]);
+            if (o2RecHyp.dca_He_Apr1 > fMaxTrack2TrackDCA[0])
               continue;
-            o2RecHyp.dca_He3_Apr2 = Hypot(He3Pos[0] - Apro2Pos[0], He3Pos[1] - Apro2Pos[1], He3Pos[2] - Apro2Pos[2]);
-            if (o2RecHyp.dca_He3_Apr2 > fMaxTrack2TrackDCA[1])
+            o2RecHyp.dca_He_Apr2 = Hypot(He3Pos[0] - Apro2Pos[0], He3Pos[1] - Apro2Pos[1], He3Pos[2] - Apro2Pos[2]);
+            if (o2RecHyp.dca_He_Apr2 > fMaxTrack2TrackDCA[1])
               continue;
 
             o2RecHyp.dca_Apr1_Apr2 = Hypot(Apro1Pos[0] - Apro2Pos[0], Apro1Pos[1] - Apro2Pos[1], Apro1Pos[2] - Apro2Pos[2]);
             if (o2RecHyp.dca_Apr1_Apr2 > fMaxTrack2TrackDCA[2])
               continue;
 
-            o2RecHyp.dca_He3_sv = Hypot(He3Pos[0] - vert[0], He3Pos[1] - vert[1], He3Pos[2] - vert[2]);
-            if (o2RecHyp.dca_He3_sv > fMaxTrack2SVDCA[0])
+            o2RecHyp.dca_He_sv = Hypot(He3Pos[0] - vert[0], He3Pos[1] - vert[1], He3Pos[2] - vert[2]);
+            if (o2RecHyp.dca_He_sv > fMaxTrack2SVDCA[0])
               continue;
             o2RecHyp.dca_Apr1_sv = Hypot(Apro1Pos[0] - vert[0], Apro1Pos[1] - vert[1], Apro1Pos[2] - vert[2]);
             if (o2RecHyp.dca_Apr1_sv > fMaxTrack2SVDCA[1])
@@ -542,7 +543,7 @@ void AliAnalysisTaskLambdaB::UserExec(Option_t *)
             bool record{!fMC || !fOnlyTrueCandidates};
             if (fMC)
             {
-              int momId = IsTrueLambdaBCandidate((AliESDtrack *)he3.track, (AliESDtrack *)p.track, (AliESDtrack *)pi.track, mcEvent);
+              int momId = IsTrueLambdaBCandidate((AliESDtrack *)he3.track, (AliESDtrack *)Apr1.track, (AliESDtrack *)Apr2.track, mcEvent);
               record = record || momId >= 0;
               if (record)
               {

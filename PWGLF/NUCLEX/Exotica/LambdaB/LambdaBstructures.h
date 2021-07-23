@@ -15,7 +15,7 @@ struct RLambdaB {
   float m = -1;
   float cosPA_Lambda = -2.; 
   Double32_t momDstar = 0;   //[0,10.22,8]
-  Double32_t cosTheta_AProton1Aproton2H = 1.; //[-1,1,8]
+  Double32_t cosTheta_AProton1Aproton2 = 1.; //[-1,1,8]
   Double32_t cosThetaStar = 1.; //[-1,1,8]
   Double32_t mAp1Ap2_vert = -1.; //[1.059,1.1352,8]
   Double32_t mAp1Ap2 = -1.; //[1.150,1.531,8]
@@ -62,10 +62,7 @@ struct RLambdaB3O2 : public RLambdaB {
   ClassDef(RLambdaB3O2,3)
 };
 
-struct 
-
-
-RLambdaB3KF : public RLambdaB {
+struct RLambdaB3KF : public RLambdaB {
   RLambdaB3KF() : RLambdaB{} {}
   virtual ~RLambdaB3KF() = default;
   float chi2_HeApr1 = -1.f;

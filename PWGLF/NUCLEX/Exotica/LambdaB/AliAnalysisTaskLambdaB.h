@@ -8,6 +8,8 @@
 #include "Math/Vector4D.h"
 #include "DCAFitterN.h"
 #include "Hypertriton3structures.h"
+#include "AliAnalysisTaskHypertriton3.h"
+#include "LambdaBstructures.h"
 
 #include <TString.h>
 #include <AliMCEvent.h>
@@ -30,29 +32,14 @@ class AliESDtrack;
 
 typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzM4D<double>> LVector_t;
 
-constexpr float kHyperLambdaBMass{5.620};
-/// helper functions
-template <typename T>
-double Sq(T a) { return a * a; }
-template <typename F>
-double Hypot(F a, F b, F c) { return std::sqrt(Sq(a) + Sq(b) + Sq(c)); }
-template <typename F>
-double Hypot(F a, F b, F c, F d) { return std::sqrt(Sq(a) + Sq(b) + Sq(c) + Sq(d)); }
-
-struct EventMixingTrack {
-  EventMixingTrack(AliESDtrack *t, float tpc, float tof, int us) : track{*t}, nSigmaTPC{tpc}, nSigmaTOF{tof}, used{us} {} 
-  AliESDtrack track = AliESDtrack();
-  float nSigmaTPC = -10.;
-  float nSigmaTOF = -10.;
-  int used = 0;
-};
+constexpr float kLambdaBMass{5.620};
 
 class AliAnalysisTaskLambdaB : public AliAnalysisTaskSE {
 
 public:
   enum kReducedTrigger { kINT7 = BIT(0), kCentral = BIT(1), kSemiCentral = BIT(2), kPositiveB = BIT(3), kHighMultV0 = BIT(4) };
 
-  AliAnalysisTaskLambdaB(bool mc = false, std::string name = "HyperTriton3O2");
+  AliAnalysisTaskLambdaB(bool mc = false, std::string name = "LambdaB3O2");
   virtual ~AliAnalysisTaskLambdaB();
 
   virtual void UserCreateOutputObjects();
@@ -77,7 +64,7 @@ public:
   int fCounter;
   o2::vertexing::DCAFitter3 fVertexer;
   o2::vertexing::DCAFitter2 fVertexerLambda;
-  enum kProng { kLambda = 0, kAProton = 1, kAProton = 2 };
+  enum kProng { kHe3 = 0, kAProton1 = 1, kAProton2 = 2 };
   bool  fSwapSign = false;
   int   fMixingTrack = 0;
   float fMassWindow[2] = {5.16f, 5.24f};
@@ -102,7 +89,7 @@ public:
 
 private:
   template<class T>
-  void FillGenHypertriton(T* ptr, int id, bool reco, AliMCEvent* mcEv);
+  void FillGenLambdaB(T* ptr, int id, bool reco, AliMCEvent* mcEv);
   int FindEventMixingCentBin(const float centrality);
   int FindEventMixingZBin(const float zVtx);
   void FillEventMixingPool(const float centrality, const float xVtx, const std::vector<EventMixingTrack> &tracks);
@@ -136,8 +123,8 @@ private:
   int fEventMixingPoolMaxReuse = 2;
 
   //!!
-  SHyperTriton3O2*   fGenHypO2 = nullptr;
-  RHyperTriton3O2*   fRecHyp = nullptr;
+  SLambdaB3O2*   fGenHypO2 = nullptr;
+  RLambdaB3O2*   fRecHyp = nullptr;
 
   AliAnalysisTaskLambdaB(const AliAnalysisTaskLambdaB &);               // not implemented
   AliAnalysisTaskLambdaB &operator=(const AliAnalysisTaskLambdaB &);    // not implemented
@@ -146,7 +133,7 @@ private:
 };
 
 template<class T>
-void AliAnalysisTaskLambdaB::FillGenHypertriton(T* ptr, int id, bool reco, AliMCEvent *mcEvent)
+void AliAnalysisTaskLambdaB::FillGenLambdaB(T* ptr, int id, bool reco, AliMCEvent *mcEvent)
 {
 
   double mcVtx[3];
@@ -155,7 +142,7 @@ void AliAnalysisTaskLambdaB::FillGenHypertriton(T* ptr, int id, bool reco, AliMC
 
   if (!part)
   {
-    ::Warning("AliAnalysisTaskLambdaB::FillGenHypertriton",
+    ::Warning("AliAnalysisTaskLambdaB::FillGenLambdaB",
               "Generated loop %d - MC TParticle pointer to current stack particle = 0x0 ! Skipping.", id);
     return;
   }
@@ -175,7 +162,7 @@ void AliAnalysisTaskLambdaB::FillGenHypertriton(T* ptr, int id, bool reco, AliMC
       break;
     }
   }
-  ptr->gCt = Hypot(mcVtx[0] - decayVtx[0], mcVtx[1] - decayVtx[1], mcVtx[2] - decayVtx[2]) * kHyperTritonMass / part->P();
+  ptr->gCt = Hypot(mcVtx[0] - decayVtx[0], mcVtx[1] - decayVtx[1], mcVtx[2] - decayVtx[2]) * kLambdaBMass / part->P();
   ptr->gPt = part->Pt();
   ptr->gPhi = std::atan2(part->Py(), part->Px());
   ptr->gPz = part->Pz();
